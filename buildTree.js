@@ -30,14 +30,63 @@ var makeSpan = function(className, children) {
     var span = document.createElement("span");
     span.className = className || "";
 
+    span.height = 0;
+    span.depth = 0;
+
+    //span.innerHTML = '<span style="position:absolute">.</span>'
+
     if (children) {
         for (var i = 0; i < children.length; i++) {
             span.appendChild(children[i]);
+
+            if (children[i].height > span.height) {
+                span.height = children[i].height;
+            }
+            if (children[i].depth > span.depth) {
+                span.depth = children[i].depth;
+            }
         }
     }
 
     return span;
 };
+
+var sig1 = 0.025;
+var sig2 = 0;
+var sig3 = 0;
+var sig4 = 0;
+var sig5 = 0.431;
+var sig6 = 1;
+var sig7 = 0;
+var sig8 = 0.677;
+var sig9 = 0.394;
+var sig10 = 0.444;
+var sig11 = 0.686;
+var sig12 = 0.345;
+var sig13 = 0.413;
+var sig14 = 0.363;
+var sig15 = 0.289;
+var sig16 = 0.150;
+var sig17 = 0.247;
+var sig18 = 0.386;
+var sig19 = 0.050;
+var sig20 = 2.390;
+var sig21 = 0.101;
+var sig22 = 0.250;
+
+var xi1 = 0;
+var xi2 = 0;
+var xi3 = 0;
+var xi4 = 0;
+var xi5 = .431;
+var xi6 = 1;
+var xi7 = 0;
+var xi8 = .04;
+var xi9 = .111;
+var xi10 = .166;
+var xi11 = .2;
+var xi12 = .6;
+var xi13 = .1;
 
 var groupTypes = {
     mathord: function(group, options, prev) {
@@ -66,42 +115,91 @@ var groupTypes = {
         return makeSpan("mrel" + options.color, [textit(group.value)]);
     },
 
-    sup: function(group, options, prev) {
-        var sup = makeSpan("msup " + options.style.cls(), [
-            makeSpan(options.style.sup().cls(), [
-                buildGroup(group.value.sup,
-                    options.withStyle(options.style.sup()))
-            ])
-        ]);
-        return makeSpan("mord", [
-            buildGroup(group.value.base, options), sup
-        ]);
-    },
-
-    sub: function(group, options, prev) {
-        var sub = makeSpan("msub " + options.style.cls(), [
-            makeSpan(options.style.sub().cls(), [
-                buildGroup(group.value.sub,
-                    options.withStyle(options.style.sub()))
-            ])
-        ]);
-        return makeSpan("mord", [
-            buildGroup(group.value.base, options), sub
-        ]);
-    },
-
     supsub: function(group, options, prev) {
-        var sup = makeSpan("msup " + options.style.sup().cls(), [
-            buildGroup(group.value.sup, options.withStyle(options.style.sup()))
-        ]);
-        var sub = makeSpan("msub " + options.style.sub().cls(), [
-            buildGroup(group.value.sub, options.withStyle(options.style.sub()))
-        ]);
+        var base = buildGroup(group.value.base, options);
 
-        var supsub = makeSpan("msupsub " + options.style.cls(), [sup, sub]);
+        if (group.value.sup) {
+            var sup = buildGroup(group.value.sup, options.withStyle(options.style.sup()));
+            var supsup = makeSpan(options.style.sup().cls(), [sup]);
+            var supzero = makeSpan(options.style.cls(), [supsup]);
+            var supcell = makeSpan(null, [supzero]);
+            var suprow = makeSpan("msup", [supcell]);
+        }
+
+        if (group.value.sub) {
+            var sub = buildGroup(group.value.sub, options.withStyle(options.style.sub()));
+            var subsub = makeSpan(options.style.sub().cls(), [sub]);
+            var subzero = makeSpan(options.style.cls(), [subsub]);
+            var subcell = makeSpan(null, [subzero]);
+            var subrow = makeSpan("msub", [subcell]);
+        }
+
+        var u = base.height - sig18 * options.style.sup().sizeMultiplier;
+        var v = base.depth + sig19 * options.style.sub().sizeMultiplier;
+
+        var p;
+        if (options.style === Style.DISPLAY) {
+            p = sig13;
+        } else if (options.style.cramped) {
+            p = sig15;
+        } else {
+            p = sig14;
+        }
+
+        var supsub;
+
+        if (!group.value.sup) {
+            v = Math.max(v, sig16, sub.height * options.style.sub().sizeMultiplier - 0.8 * sig5);
+
+            //subzero.style.top = v + "em";
+
+            subrow.depth = subrow.depth + v;
+            subrow.height = 0;
+
+            supsub = makeSpan("msupsub single", [subrow]);
+        } else if (!group.value.sub) {
+            u = Math.max(u, p, sup.depth * options.style.sup().sizeMultiplier + 0.25 * sig5);
+
+            //supzero.style.top = -u + "em";
+
+            suprow.height = suprow.height + u;
+            suprow.depth = 0;
+
+            supsub = makeSpan("msupsub single", [suprow]);
+        } else {
+            u = Math.max(u, p, sup.depth * options.style.sup().sizeMultiplier + 0.25 * sig5);
+            v = Math.max(v, sig17);
+
+            var theta = xi8;
+
+            var supdepth = sup.depth * options.style.sup().sizeMultiplier;
+            var subheight = sub.height * options.style.sub().sizeMultiplier;
+
+            console.log(u - supdepth, subheight - v, (u - supdepth) - (subheight - v), 4 * theta);
+
+            if ((u - supdepth) - (subheight - v) < 4 * theta) {
+                v = 4 * theta - (u - supdepth) + subheight;
+                var psi = 0.8 * sig5 - (u - supdepth);
+                if (psi > 0) {
+                    u += psi;
+                    v -= psi;
+                }
+            }
+
+            //supzero.style.top = -u + "em";
+            //subzero.style.top = v + "em";
+
+            suprow.height = suprow.height + u;
+            suprow.depth = 0;
+
+            subrow.depth = subrow.depth + v;
+            subrow.height = 0;
+
+            supsub = makeSpan("msupsub", [suprow, subrow]);
+        }
 
         return makeSpan("mord", [
-            buildGroup(group.value.base, options), supsub
+            base, supsub
         ]);
     },
 
@@ -285,23 +383,147 @@ var charLookup = {
     "\\Omega": "\u03a9"
 };
 
+var heightMap = {
+  "a": .430554,
+  "b": .694444,
+  "c": .430554,
+  "d": .694444,
+  "e": .430554,
+  "f": .694444,
+  "g": .430554,
+  "h": .694444,
+  "i": .659525,
+  "j": .659525,
+  "k": .694444,
+  "l": .694444,
+  "m": .430554,
+  "n": .430554,
+  "o": .430554,
+  "p": .430554,
+  "q": .430554,
+  "r": .430554,
+  "s": .430554,
+  "t": .615079,
+  "u": .430554,
+  "v": .430554,
+  "w": .430554,
+  "x": .430554,
+  "y": .430554,
+  "z": .430554,
+  "A": .683331,
+  "B": .683331,
+  "C": .683331,
+  "D": .683331,
+  "E": .683331,
+  "F": .683331,
+  "G": .683331,
+  "H": .683331,
+  "I": .683331,
+  "J": .683331,
+  "K": .683331,
+  "L": .683331,
+  "M": .683331,
+  "N": .683331,
+  "O": .683331,
+  "P": .683331,
+  "Q": .683331,
+  "R": .683331,
+  "S": .683331,
+  "T": .683331,
+  "U": .683331,
+  "V": .683331,
+  "W": .683331,
+  "X": .683331,
+  "Y": .683331,
+  "Z": .683331,
+  "+": .583333,
+  "-": .583333
+};
+
+var depthMap = {
+  "a": 0,
+  "b": 0,
+  "c": 0,
+  "d": 0,
+  "e": 0,
+  "f": .194444,
+  "g": .194444,
+  "h": 0,
+  "i": 0,
+  "j": .194444,
+  "k": 0,
+  "l": 0,
+  "m": 0,
+  "n": 0,
+  "o": 0,
+  "p": .194444,
+  "q": .194444,
+  "r": 0,
+  "s": 0,
+  "t": 0,
+  "u": 0,
+  "v": 0,
+  "w": 0,
+  "x": 0,
+  "y": .194444,
+  "z": 0,
+  "A": 0,
+  "B": 0,
+  "C": 0,
+  "D": 0,
+  "E": 0,
+  "F": 0,
+  "G": 0,
+  "H": 0,
+  "I": 0,
+  "J": 0,
+  "K": 0,
+  "L": 0,
+  "M": 0,
+  "N": 0,
+  "O": 0,
+  "P": 0,
+  "Q": .194444,
+  "R": 0,
+  "S": 0,
+  "T": 0,
+  "U": 0,
+  "V": 0,
+  "W": 0,
+  "X": 0,
+  "Y": 0,
+  "Z": 0,
+  "+": .083333,
+  "-": .083333
+};
+
 var textit = function(value) {
+    // Most things have a depth of 0, and both numbers and capital letters have
+    // heights of 0.69, which is why we use those as the defaults.
+    var height = (value in heightMap) ? heightMap[value] : 0.69;
+    var depth = (value in depthMap) ? depthMap[value] : 0;
+
     if (value in charLookup) {
         value = charLookup[value];
     }
-    return document.createTextNode(value);
+
+    var node = document.createTextNode(value);
+
+    node.height = height;
+    node.depth = depth;
+
+    return node;
 };
 
 var mathit = function(value) {
-    return makeSpan("mathit", [textit(value)]);
-};
+    var text = textit(value);
 
-var clearNode = function(node) {
-    if ("textContent" in node) {
-        node.textContent = "";
-    } else {
-        node.innerText = "";
-    }
+    var math = makeSpan("mathit", [text]);
+
+    math.height = text.height;
+    math.depth = text.depth;
+
+    return math;
 };
 
 var buildTree = function(tree) {

@@ -6,4 +6,6 @@ body {
 input {
     margin: 0px;
     font-size: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }

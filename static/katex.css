@@ -65,25 +65,39 @@ big parens
 .katex .scriptstyle > .scriptscriptstyle { font-size: 0.75em; }
 
 .katex .msub {
-    vertical-align: bottom;
     position: relative;
-    top: 0.2em;
 }
 
 .katex .msup {
     position: relative;
-    top: -0.5em;
 }
 
 .katex .msupsub {
     display: inline-table;
-    table-layout: fixed;
-    vertical-align: middle;
+    vertical-align: top;
 }
 
-.katex .msupsub > .msup, .katex .msupsub > .msub {
-    display: table-row;
+.katex .msupsub.single {
     vertical-align: baseline;
+}
+
+.katex .msupsub > .msup,
+.katex .msupsub > .msub {
+    display: table-row;
+    vertical-align: inherit;
+}
+
+.katex .msupsub > .msup > span,
+.katex .msupsub > .msub > span {
+    display: table-cell;
+    vertical-align: inherit;
+}
+
+.katex .msupsub > .msup > span > span,
+.katex .msupsub > .msub > span > span {
+    display: block;
+    height: 0;
+    position: relative;
 }
 
 .katex .mfrac { display: inline-table; }

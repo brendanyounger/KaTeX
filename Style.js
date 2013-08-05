@@ -1,7 +1,8 @@
-function Style(id, size, cramped) {
+function Style(id, size, multiplier, cramped) {
     this.id = id;
     this.size = size;
     this.cramped = cramped;
+    this.sizeMultiplier = multiplier;
 }
 
 Style.prototype.sup = function() {
@@ -44,14 +45,14 @@ var sizeNames = [
 ];
 
 var styles = [
-    new Style(D, 0, false),
-    new Style(Dc, 0, true),
-    new Style(T, 1, false),
-    new Style(Tc, 1, true),
-    new Style(S, 2, false),
-    new Style(Sc, 2, true),
-    new Style(SS, 3, false),
-    new Style(SSc, 3, true)
+    new Style(D, 0, 1.0, false),
+    new Style(Dc, 0, 1.0, true),
+    new Style(T, 1, 1.0, false),
+    new Style(Tc, 1, 1.0, true),
+    new Style(S, 2, 0.66667, false),
+    new Style(Sc, 2, 0.66667, true),
+    new Style(SS, 3, 0.75, false),
+    new Style(SSc, 3, 0.75, true)
 ];
 
 var sup = [S, Sc, S, Sc, SS, SSc, SS, SSc];
