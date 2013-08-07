@@ -21,6 +21,18 @@ big parens
     white-space: nowrap;
 }
 
+.katex .base {
+    display: inline-block;
+}
+
+.katex .strut {
+    display: inline-block;
+}
+
+.katex .strut.bottom {
+    vertical-align: top;
+}
+
 .katex .mathit {
     font-family: katex_math;
     font-style: italic;
@@ -65,6 +77,9 @@ big parens
 .katex .textstyle > .scriptstyle { font-size: 0.66667em; }
 .katex .scriptstyle > .scriptscriptstyle { font-size: 0.75em; }
 
+.katex .scriptstyle > .textstyle { font-size: 1.5em; }
+.katex .scriptscriptstyle > .textstyle { font-size: 2em; }
+
 .katex .msub {
     position: relative;
 }
@@ -90,27 +105,32 @@ big parens
     display: inline-block;
 }
 
-.katex .mfrac { display: inline-table; }
+.katex .mfrac {
+    display: inline-block;
+    vertical-align: top;
+}
 
 /* TODO(alpert): Where do these numbers come from? */
-.katex .mfrac.textstyle.displaystyle { vertical-align: 0.58em; }
-.katex .mfrac.textstyle { vertical-align: 0.50em; }
-.katex .mfrac.scriptstyle { vertical-align: 0.50em; }
-.katex .mfrac.scriptscriptstyle { vertical-align: 0.6em; }
+/*.katex .mfrac.textstyle.displaystyle { vertical-align: 0.58em; }*/
+/*.katex .mfrac.textstyle { vertical-align: 0.50em; }*/
+/*.katex .mfrac.scriptstyle { vertical-align: 0.50em; }*/
+/*.katex .mfrac.scriptscriptstyle { vertical-align: 0.6em; }*/
 
 .katex .mfracnum, .katex .mfracmid, .katex .mfracden {
-    display: table-row;
+    display: block;
+    height: 0;
+    position: relative;
     text-align: center;
 }
 
-.katex .mfracmid:before {
+.katex .mfracmid > span:before {
     border-bottom-style: solid;
     border-bottom-width: 1px;
     content: "";
     display: block;
 }
 
-.katex .mfracmid:after {
+.katex .mfracmid > span:after {
     border-bottom-style: solid;
     border-bottom-width: 0.05em;
     content: "";
@@ -118,9 +138,14 @@ big parens
     margin-top: -1px;
 }
 
-.katex .mfracnum > span {
+.katex .mfracmid > span {
+    width: 100%;
+}
+
+.katex .mfracnum > span,
+.katex .mfracmid > span,
+.katex .mfracden > span {
     display: inline-block;
-    vertical-align: bottom;
 }
 
 .katex .mspace {

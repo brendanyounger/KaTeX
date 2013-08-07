@@ -3,17 +3,26 @@ var Style = require("./Style");
 var parseTree = require("./parseTree");
 var utils = require("./utils");
 
-function Options(style, color) {
+function Options(style, color, styleChange) {
     this.style = style;
     this.color = color;
+
+    if (typeof styleChange === "undefined") {
+        styleChange = false;
+    }
+    this.styleChange = styleChange;
 }
 
 Options.prototype.withStyle = function(style) {
-    return new Options(style, this.color);
+    return new Options(style, this.color, true);
 }
 
 Options.prototype.withColor = function(color) {
     return new Options(this.style, color);
+}
+
+Options.prototype.clone = function() {
+    return new Options(this.style, this.color);
 }
 
 var buildExpression = function(expression, options, prev) {
@@ -33,8 +42,6 @@ var makeSpan = function(className, children) {
     span.height = 0;
     span.depth = 0;
 
-    //span.innerHTML = '<span style="position:absolute">.</span>'
-
     if (children) {
         for (var i = 0; i < children.length; i++) {
             span.appendChild(children[i]);
@@ -47,6 +54,8 @@ var makeSpan = function(className, children) {
             }
         }
     }
+
+    //console.log(className, span.height, span.depth, children);
 
     return span;
 };
@@ -116,9 +125,8 @@ var groupTypes = {
     },
 
     supsub: function(group, options, prev) {
-        var base = buildGroup(group.value.base, options);
-        var subscale = options.style.sub().sizeMultiplier /
-                options.style.sizeMultiplier;
+        var base = buildGroup(group.value.base, options.clone());
+        var subscale = 1 / options.style.sizeMultiplier;
 
         if (group.value.sup) {
             var sup = buildGroup(group.value.sup, options.withStyle(options.style.sup()));
@@ -221,21 +229,67 @@ var groupTypes = {
         var nstyle = fstyle.fracNum();
         var dstyle = fstyle.fracDen();
 
-        var numer = makeSpan("mfracnum " + nstyle.cls(), [
-            makeSpan("", [
-                buildGroup(group.value.numer, options.withStyle(nstyle))
-            ])
-        ]);
-        var mid = makeSpan("mfracmid");
-        var denom = makeSpan("mfracden " + dstyle.cls(), [
-            makeSpan("", [
-                buildGroup(group.value.denom, options.withStyle(dstyle))
-            ])
+        var numer = buildGroup(group.value.numer, options.withStyle(nstyle));
+        var numernumer = makeSpan(nstyle.cls(), [numer]);
+        var numerrow = makeSpan("mfracnum " + fstyle.cls(), [numernumer]);
+
+        var mid = makeSpan("mfracmid", [makeSpan()]);
+
+        var denom = buildGroup(group.value.denom, options.withStyle(dstyle));
+        var denomdenom = makeSpan(dstyle.cls(), [denom])
+        var denomrow = makeSpan("mfracden " + fstyle.cls(), [denomdenom]);
+
+        var numerscale = 1 / fstyle.sizeMultiplier;
+
+        var theta = xi8;
+
+        var u, v, phi;
+        if (fstyle.size === Style.DISPLAY.size) {
+            u = sig8;
+            v = sig11;
+            phi = 3 * theta;
+        } else {
+            u = sig9;
+            v = sig12;
+            phi = theta;
+        }
+
+        var a = sig22;
+
+        var numerdepth = numer.depth * numerscale;
+        var denomheight = denom.height * numerscale;
+
+        if ((u - numerdepth) - (a + 0.5 * theta) < phi) {
+            u += phi - ((u - numerdepth) - (a + 0.5 * theta));
+        }
+
+        if ((a - 0.5 * theta) - (denomheight - v) < phi) {
+            v += phi - ((a - 0.5 * theta) - (denomheight - v));
+        }
+
+        console.log(u, v);
+
+        numerrow.style.top = -u + "em";
+        mid.style.top = -(a - 0.5 * theta) + "em";
+        denomrow.style.top = v + "em";
+
+        numerrow.height = numerrow.height * numerscale + u;
+        numerrow.depth = 0;
+
+        denomrow.height = 0;
+        denomrow.depth = denomrow.depth * numerscale + v;
+
+        var frac = makeSpan("minner mfrac" + options.color, [
+            numerrow, mid, denomrow
         ]);
 
-        return makeSpan("minner mfrac " + fstyle.cls() + options.color, [
-            numer, mid, denom
-        ]);
+        frac.height *= fstyle.sizeMultiplier / options.style.sizeMultiplier;
+        frac.depth *= fstyle.sizeMultiplier / options.style.sizeMultiplier;
+
+        var wrap1 = makeSpan(fstyle.cls(), [frac]);
+        var wrap2 = makeSpan(options.style.cls(), [wrap1]);
+
+        return wrap2;
     },
 
     color: function(group, options, prev) {
@@ -268,12 +322,12 @@ var groupTypes = {
     },
 
     llap: function(group, options, prev) {
-        var inner = makeSpan("", [buildGroup(group.value, options)]);
+        var inner = makeSpan("", [buildGroup(group.value, options.clone())]);
         return makeSpan("llap " + options.style.cls(), [inner]);
     },
 
     rlap: function(group, options, prev) {
-        var inner = makeSpan("", [buildGroup(group.value, options)]);
+        var inner = makeSpan("", [buildGroup(group.value, options.clone())]);
         return makeSpan("rlap " + options.style.cls(), [inner]);
     },
 
@@ -283,7 +337,7 @@ var groupTypes = {
 
     ordgroup: function(group, options, prev) {
         return makeSpan("mord " + options.style.cls(),
-            buildExpression(group.value, options)
+            buildExpression(group.value, options.clone())
         );
     },
 
@@ -298,7 +352,16 @@ var buildGroup = function(group, options, prev) {
     }
 
     if (groupTypes[group.type]) {
-        return groupTypes[group.type](group, options, prev);
+        var groupNode = groupTypes[group.type](group, options, prev);
+
+        if (options.styleChange) {
+            //console.log(group.type, options.style.sizeMultiplier);
+
+            groupNode.height *= options.style.sizeMultiplier;
+            groupNode.depth *= options.style.sizeMultiplier;
+        }
+
+        return groupNode;
     } else {
         throw new ParseError(
             "Lex error: Got group of unknown type: '" + group.type + "'");
@@ -524,8 +587,14 @@ var buildTree = function(tree) {
     var options = new Options(Style.TEXT, "");
 
     var expression = buildExpression(tree, options);
-    var span = makeSpan(options.style.cls(), expression);
-    var katexNode = makeSpan("katex", [span]);
+    var span = makeSpan("base " + options.style.cls(), expression);
+    var topStrut = makeSpan("strut");
+    var bottomStrut = makeSpan("strut bottom");
+
+    topStrut.style.height = span.height + "em";
+    bottomStrut.style.height = (span.height + span.depth) + "em";
+
+    var katexNode = makeSpan("katex", [topStrut, bottomStrut, span]);
 
     return katexNode;
 };
