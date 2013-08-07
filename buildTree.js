@@ -117,25 +117,23 @@ var groupTypes = {
 
     supsub: function(group, options, prev) {
         var base = buildGroup(group.value.base, options);
+        var subscale = options.style.sub().sizeMultiplier /
+                options.style.sizeMultiplier;
 
         if (group.value.sup) {
             var sup = buildGroup(group.value.sup, options.withStyle(options.style.sup()));
             var supsup = makeSpan(options.style.sup().cls(), [sup]);
-            var supzero = makeSpan(options.style.cls(), [supsup]);
-            var supcell = makeSpan(null, [supzero]);
-            var suprow = makeSpan("msup", [supcell]);
+            var suprow = makeSpan("msup " + options.style.cls(), [supsup]);
         }
 
         if (group.value.sub) {
             var sub = buildGroup(group.value.sub, options.withStyle(options.style.sub()));
             var subsub = makeSpan(options.style.sub().cls(), [sub]);
-            var subzero = makeSpan(options.style.cls(), [subsub]);
-            var subcell = makeSpan(null, [subzero]);
-            var subrow = makeSpan("msub", [subcell]);
+            var subrow = makeSpan("msub " + options.style.cls(), [subsub]);
         }
 
-        var u = base.height - sig18 * options.style.sup().sizeMultiplier;
-        var v = base.depth + sig19 * options.style.sub().sizeMultiplier;
+        var u = base.height - sig18 * subscale;
+        var v = base.depth + sig19 * subscale;
 
         var p;
         if (options.style === Style.DISPLAY) {
@@ -149,33 +147,31 @@ var groupTypes = {
         var supsub;
 
         if (!group.value.sup) {
-            v = Math.max(v, sig16, sub.height * options.style.sub().sizeMultiplier - 0.8 * sig5);
+            v = Math.max(v, sig16, sub.height * subscale - 0.8 * sig5);
 
-            //subzero.style.top = v + "em";
+            subrow.style.top = v + "em";
 
-            subrow.depth = subrow.depth + v;
+            subrow.depth = subrow.depth * subscale + v;
             subrow.height = 0;
 
-            supsub = makeSpan("msupsub single", [subrow]);
+            supsub = makeSpan("msupsub", [subrow]);
         } else if (!group.value.sub) {
-            u = Math.max(u, p, sup.depth * options.style.sup().sizeMultiplier + 0.25 * sig5);
+            u = Math.max(u, p, sup.depth * subscale + 0.25 * sig5);
 
-            //supzero.style.top = -u + "em";
+            suprow.style.top = -u + "em";
 
-            suprow.height = suprow.height + u;
+            suprow.height = suprow.height * subscale + u;
             suprow.depth = 0;
 
-            supsub = makeSpan("msupsub single", [suprow]);
+            supsub = makeSpan("msupsub", [suprow]);
         } else {
-            u = Math.max(u, p, sup.depth * options.style.sup().sizeMultiplier + 0.25 * sig5);
+            u = Math.max(u, p, sup.depth * subscale + 0.25 * sig5);
             v = Math.max(v, sig17);
 
             var theta = xi8;
 
-            var supdepth = sup.depth * options.style.sup().sizeMultiplier;
-            var subheight = sub.height * options.style.sub().sizeMultiplier;
-
-            console.log(u - supdepth, subheight - v, (u - supdepth) - (subheight - v), 4 * theta);
+            var supdepth = sup.depth * subscale;
+            var subheight = sub.height * subscale;
 
             if ((u - supdepth) - (subheight - v) < 4 * theta) {
                 v = 4 * theta - (u - supdepth) + subheight;
@@ -186,21 +182,19 @@ var groupTypes = {
                 }
             }
 
-            //supzero.style.top = -u + "em";
-            //subzero.style.top = v + "em";
+            suprow.style.top = -u + "em";
+            subrow.style.top = v + "em";
 
-            suprow.height = suprow.height + u;
+            suprow.height = suprow.height * subscale + u;
             suprow.depth = 0;
 
-            subrow.depth = subrow.depth + v;
             subrow.height = 0;
+            subrow.depth = subrow.depth * subscale + v;
 
             supsub = makeSpan("msupsub", [suprow, subrow]);
         }
 
-        return makeSpan("mord", [
-            base, supsub
-        ]);
+        return makeSpan("mord", [base, supsub]);
     },
 
     open: function(group, options, prev) {

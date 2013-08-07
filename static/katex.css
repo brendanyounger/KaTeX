@@ -15,6 +15,7 @@ big parens
 */
 
 .katex {
+    display: inline-block;
     font: normal 1.21em katex_main;
     line-height: 1.2;
     white-space: nowrap;
@@ -73,31 +74,20 @@ big parens
 }
 
 .katex .msupsub {
-    display: inline-table;
+    display: inline-block;
     vertical-align: top;
-}
-
-.katex .msupsub.single {
-    vertical-align: baseline;
 }
 
 .katex .msupsub > .msup,
 .katex .msupsub > .msub {
-    display: table-row;
-    vertical-align: inherit;
+    display: block;
+    height: 0;
+    position: relative;
 }
 
 .katex .msupsub > .msup > span,
 .katex .msupsub > .msub > span {
-    display: table-cell;
-    vertical-align: inherit;
-}
-
-.katex .msupsub > .msup > span > span,
-.katex .msupsub > .msub > span > span {
-    display: block;
-    height: 0;
-    position: relative;
+    display: inline-block;
 }
 
 .katex .mfrac { display: inline-table; }

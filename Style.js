@@ -51,8 +51,8 @@ var styles = [
     new Style(Tc, 1, 1.0, true),
     new Style(S, 2, 0.66667, false),
     new Style(Sc, 2, 0.66667, true),
-    new Style(SS, 3, 0.75, false),
-    new Style(SSc, 3, 0.75, true)
+    new Style(SS, 3, 0.5, false),
+    new Style(SSc, 3, 0.5, true)
 ];
 
 var sup = [S, Sc, S, Sc, SS, SSc, SS, SSc];
