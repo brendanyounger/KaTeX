@@ -55,8 +55,6 @@ var makeSpan = function(className, children) {
         }
     }
 
-    //console.log(className, span.height, span.depth, children);
-
     return span;
 };
 
@@ -214,11 +212,6 @@ var groupTypes = {
     },
 
     frac: function(group, options, prev) {
-        if (utils.isBuggyWebKit) {
-            throw new ParseError(
-                    "KaTeX fractions don't work in WebKit <= 537.1");
-        }
-
         var fstyle = options.style;
         if (group.value.size === "dfrac") {
             fstyle = Style.DISPLAY;
@@ -267,8 +260,6 @@ var groupTypes = {
             v += phi - ((a - 0.5 * theta) - (denomheight - v));
         }
 
-        console.log(u, v);
-
         numerrow.style.top = -u + "em";
         mid.style.top = -(a - 0.5 * theta) + "em";
         denomrow.style.top = v + "em";
@@ -279,9 +270,7 @@ var groupTypes = {
         denomrow.height = 0;
         denomrow.depth = denomrow.depth * numerscale + v;
 
-        var frac = makeSpan("minner mfrac" + options.color, [
-            numerrow, mid, denomrow
-        ]);
+        var frac = makeSpan("", [numerrow, mid, denomrow]);
 
         frac.height *= fstyle.sizeMultiplier / options.style.sizeMultiplier;
         frac.depth *= fstyle.sizeMultiplier / options.style.sizeMultiplier;
@@ -289,7 +278,9 @@ var groupTypes = {
         var wrap1 = makeSpan(fstyle.cls(), [frac]);
         var wrap2 = makeSpan(options.style.cls(), [wrap1]);
 
-        return wrap2;
+        return makeSpan("minner" + options.color, [
+            makeSpan("mfrac", [wrap2])
+        ]);
     },
 
     color: function(group, options, prev) {
@@ -299,8 +290,19 @@ var groupTypes = {
             options.withColor(" " + group.value.color),
             prev
         );
+
+        frag.height = 0;
+        frag.depth = 0;
+
         for (var i = 0; i < els.length; i++) {
             frag.appendChild(els[i]);
+
+            if (els[i].height > frag.height) {
+                frag.height = els[i].height;
+            }
+            if (els[i].depth > frag.depth) {
+                frag.depth = els[i].depth;
+            }
         }
         return frag;
     },
@@ -355,8 +357,6 @@ var buildGroup = function(group, options, prev) {
         var groupNode = groupTypes[group.type](group, options, prev);
 
         if (options.styleChange) {
-            //console.log(group.type, options.style.sizeMultiplier);
-
             groupNode.height *= options.style.sizeMultiplier;
             groupNode.depth *= options.style.sizeMultiplier;
         }

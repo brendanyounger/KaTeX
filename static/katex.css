@@ -90,6 +90,7 @@ big parens
 
 .katex .msupsub {
     display: inline-block;
+    text-align: left;
     vertical-align: top;
 }
 
