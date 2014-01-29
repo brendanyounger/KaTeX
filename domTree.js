@@ -12,8 +12,6 @@ function span(classes, children, height, depth, style) {
 }
 
 span.prototype.toDOM = function() {
-    var span = document.createElement("span");
-
     var classes = this.classes.slice();
     for (var i = classes.length - 1; i >= 0; i--) {
         if (!classes[i]) {
@@ -21,19 +19,14 @@ span.prototype.toDOM = function() {
         }
     }
 
-    span.className = classes.join(" ");
-
-    for (var style in this.style) {
-        if (this.style.hasOwnProperty(style)) {
-            span.style[style] = this.style[style];
-        }
-    }
-
-    for (var i = 0; i < this.children.length; i++) {
-        span.appendChild(this.children[i].toDOM());
-    }
-
-    return span;
+    return React.DOM.span({
+        className:classes.join(" "),
+        style:this.style,
+        children:this.children.map(
+            function (child) {
+                return child.toDOM();
+            })
+        });
 };
 
 function documentFragment(children, height, depth) {
@@ -43,13 +36,14 @@ function documentFragment(children, height, depth) {
 }
 
 documentFragment.prototype.toDOM = function() {
-    var frag = document.createDocumentFragment();
+    // var frag = document.createDocumentFragment();
 
-    for (var i = 0; i < this.children.length; i++) {
-        frag.appendChild(this.children[i].toDOM());
-    }
+    // for (var i = 0; i < this.children.length; i++) {
+    //     frag.appendChild(this.children[i].toDOM());
+    // }
 
-    return frag;
+    // return frag;
+    return this.children.map(function(child) { return child.toDOM(); })
 };
 
 function textNode(value, height, depth) {
@@ -59,7 +53,8 @@ function textNode(value, height, depth) {
 }
 
 textNode.prototype.toDOM = function() {
-    return document.createTextNode(this.value);
+    // return document.createTextNode(this.value);
+    return this.value;
 };
 
 module.exports = {

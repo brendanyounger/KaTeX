@@ -1,16 +1,18 @@
 window.onload = function() {
-    var input = document.getElementById("input");
-    var math = document.getElementById("math");
+    // var input = document.getElementById("input");
+    // var math = document.getElementById("math");
 
-    if ("oninput" in input) {
-        input.addEventListener("input", reprocess, false);
-    } else {
-        input.attachEvent("onkeyup", reprocess);
-    }
+    // if ("oninput" in input) {
+    //     input.addEventListener("input", reprocess, false);
+    // } else {
+    //     input.attachEvent("onkeyup", reprocess);
+    // }
 
-    reprocess();
+    // reprocess();
 
-    function reprocess() {
-        katex.process(input.value, math);
-    }
+    // function reprocess() {
+    //     katex.process(input.value, math);
+    // }
 };
+
+// React.renderComponent(katex.MathDisplay({}), document.getElementById('math'));

@@ -408,6 +408,13 @@ Parser.prototype.parseNucleus = function(pos) {
             throw new ParseError("Parse error: Expected numerator after '" +
                 nucleus.type + "'");
         }
+    } else if (nucleus.type === "\\sqrt") {
+        var arg = this.parseGroup(nucleus.position);
+        if (arg) {
+            return new ParseResult(new ParseNode("sqrt", arg.result), arg.position);
+        } else {
+            throw new ParseError("Parse Error: Expected an argument to \\sqrt");
+        }
     } else if (nucleus.type === "\\KaTeX") {
         return new ParseResult(
             new ParseNode("katex", null),

@@ -13,7 +13,11 @@ var process = function(toParse, baseNode) {
     baseNode.appendChild(node);
 };
 
+var render = function(toParse) {
+  return buildTree(parseTree(toParse));
+};
+
 module.exports = {
-    process: process,
+    render: render,
     ParseError: ParseError
 };

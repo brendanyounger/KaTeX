@@ -43,6 +43,7 @@ var groupToType = {
     amsrel: "mrel",
     open: "mopen",
     close: "mclose",
+    sqrt: "mopen",
     frac: "minner",
     spacing: "mord",
     punct: "mpunct",
@@ -188,6 +189,12 @@ var groupTypes = {
 
     close: function(group, options, prev) {
         return makeSpan(["mclose", options.color], [mathrm(group.value)]);
+    },
+
+    sqrt: function(group, options, prev) {
+        var grp = buildGroup(group.value, options.reset());
+        // grp.style.borderTop = "5px solid black";
+        return makeSpan(["mopen", options.style.cls()], [mathrm("\u221a("), grp, mathrm(")")]);
     },
 
     frac: function(group, options, prev) {
@@ -449,6 +456,7 @@ var charLookup = {
     "\\times": "\u00d7",
     "\\to": "\u2192",
     "\\triangle": "\u25b3",
+    "\\sqrt": "\u221a",
 
     "\\alpha": "\u03b1",
     "\\beta": "\u03b2",

@@ -19,26 +19,27 @@ var contains = function(list, elem) {
     return indexOf(list, elem) !== -1;
 };
 
-var setTextContent;
+// var setTextContent;
 
-var testNode = document.createElement("span");
-if ("textContent" in testNode) {
-    setTextContent = function(node, text) {
-        node.textContent = text;
-    };
-} else {
-    setTextContent = function(node, text) {
-        node.innerText = text;
-    };
-}
+// var testNode = document.createElement("span");
+// if ("textContent" in testNode) {
+//     setTextContent = function(node, text) {
+//         node.textContent = text;
+//     };
+// } else {
+//     setTextContent = function(node, text) {
+//         node.innerText = text;
+//     };
+// }
 
 function clearNode(node) {
-    setTextContent(node, "");
+    // setTextContent(node, "");
+    node.innerText = '';
 }
 
 module.exports = {
     contains: contains,
     indexOf: indexOf,
-    setTextContent: setTextContent,
+    // setTextContent: setTextContent,
     clearNode: clearNode
 };
