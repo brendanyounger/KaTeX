@@ -10,7 +10,8 @@
   "files": [
     "katex.js",
     "cli.js",
-    "src/"
+    "src/",
+    "static/"
   ],
   "license": "MIT",
   "devDependencies": {
